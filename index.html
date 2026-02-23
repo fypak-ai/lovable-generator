@@ -59,11 +59,13 @@ When generating code:
 
 Output ONLY the code, no explanations. Start directly with the imports.`;
 
-    const MODELS = [
-      { id: 'gpt-4o', label: 'GPT-4o' },
-      { id: 'gpt-4o-mini', label: 'GPT-4o Mini (rapido)' },
-      { id: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-    ];
+    const PROVIDERS = {
+      openai: { label: 'OpenAI', color: '#10a37f', baseUrl: 'https://api.openai.com/v1', keyPlaceholder: 'sk-proj-...', keyHint: 'platform.openai.com/api-keys', models: [{ id: 'gpt-4o', label: 'GPT-4o' }, { id: 'gpt-4o-mini', label: 'GPT-4o Mini (rapido)' }, { id: 'gpt-4-turbo', label: 'GPT-4 Turbo' }] },
+      groq: { label: 'Groq', color: '#f55036', baseUrl: 'https://api.groq.com/openai/v1', keyPlaceholder: 'gsk_...', keyHint: 'console.groq.com/keys - GRATIS', models: [{ id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B (recomendado)' }, { id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B (ultra rapido)' }, { id: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' }, { id: 'qwen-2.5-coder-32b', label: 'Qwen 2.5 Coder 32B' }] },
+      perplexity: { label: 'Perplexity', color: '#20808d', baseUrl: 'https://api.perplexity.ai', keyPlaceholder: 'pplx-...', keyHint: 'perplexity.ai/settings/api', models: [{ id: 'sonar', label: 'Sonar (rapido)' }, { id: 'sonar-pro', label: 'Sonar Pro' }, { id: 'sonar-reasoning', label: 'Sonar Reasoning' }] },
+      qwen: { label: 'Qwen', color: '#6366f1', baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', keyPlaceholder: 'sk-...', keyHint: 'bailian.console.aliyun.com - GRATIS (trial)', models: [{ id: 'qwen-coder-plus', label: 'Qwen Coder Plus' }, { id: 'qwen-coder-turbo', label: 'Qwen Coder Turbo (rapido)' }, { id: 'qwen-plus', label: 'Qwen Plus' }, { id: 'qwen-turbo', label: 'Qwen Turbo' }] }
+    };
+    const PROVIDER_ORDER = ['openai', 'groq', 'perplexity', 'qwen'];
 
     function CopyButton({ text }) {
       const [copied, setCopied] = useState(false);
@@ -82,11 +84,52 @@ Output ONLY the code, no explanations. Start directly with the imports.`;
       return (<div className={`flex gap-3 fade-in ${isUser ? 'flex-row-reverse' : 'flex-row'}`}><div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${isUser ? 'bg-violet-600 text-white' : 'bg-gradient-to-br from-violet-500 to-pink-500 text-white'}`}>{isUser ? 'V' : 'L'}</div><div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${isUser ? 'bg-violet-600 text-white rounded-tr-none' : 'bg-gray-800 text-gray-200 rounded-tl-none'}`}>{msg.content}</div></div>);
     }
 
+    function ProviderSetup({ onReady }) {
+      const [provider, setProvider] = useState('openai');
+      const [keys, setKeys] = useState({ openai: '', groq: '', perplexity: '', qwen: '' });
+      const [model, setModel] = useState(PROVIDERS.openai.models[0].id);
+      const [error, setError] = useState('');
+      const p = PROVIDERS[provider];
+      const handleProviderChange = (id) => { setProvider(id); setModel(PROVIDERS[id].models[0].id); setError(''); };
+      const handleStart = () => {
+        const key = keys[provider].trim();
+        if (!key) { setError('Insira a chave API.'); return; }
+        setError('');
+        onReady({ provider, apiKey: key, model });
+      };
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="w-full max-w-md fade-in">
+            <div className="text-center mb-8"><div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-white">*</div><h1 className="text-2xl font-bold text-white mb-1">Lovable Generator</h1><p className="text-gray-400 text-sm">Gerador de apps React com o sistema do Lovable</p></div>
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 space-y-5">
+              <div>
+                <label className="text-sm text-gray-400 mb-2 block">Provedor</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {PROVIDER_ORDER.map(id => (<button key={id} onClick={() => handleProviderChange(id)} style={provider === id ? { background: PROVIDERS[id].color } : {}} className={`py-2 px-1 rounded-xl text-xs font-semibold border transition-all ${provider === id ? 'border-transparent text-white' : 'border-gray-700 text-gray-400 hover:border-gray-500 bg-gray-800'}`}>{PROVIDERS[id].label}</button>))}
+                </div>
+                {provider === 'groq' && <p className="text-xs text-green-400 mt-2">Groq e GRATIS - crie em console.groq.com</p>}
+                {provider === 'qwen' && <p className="text-xs text-green-400 mt-2">Qwen tem tier gratuito - crie em bailian.console.aliyun.com</p>}
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-2 block">Chave API - {p.label}</label>
+                <input type="password" value={keys[provider]} onChange={e => setKeys(prev => ({ ...prev, [provider]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleStart()} placeholder={p.keyPlaceholder} className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm" />
+                <p className="text-xs text-gray-500 mt-1.5">{p.keyHint}</p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-2 block">Modelo</label>
+                <select value={model} onChange={e => setModel(e.target.value)} className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 text-sm">{p.models.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select>
+              </div>
+              {error && <p className="text-red-400 text-xs">{error}</p>}
+              <button onClick={handleStart} className="w-full bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 text-white font-semibold py-3 rounded-xl transition-all">Comecar</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function App() {
-      const [apiKey, setApiKey] = useState('');
-      const [apiKeySet, setApiKeySet] = useState(false);
-      const [model, setModel] = useState('gpt-4o');
-      const [messages, setMessages] = useState([{ role: 'assistant', content: 'Ola! Descreva o app React que voce quer criar. Vou gerar o codigo completo seguindo as diretrizes do Lovable.' }]);
+      const [session, setSession] = useState(null);
+      const [messages, setMessages] = useState([{ role: 'assistant', content: 'Ola! Descreva o app React que voce quer criar.' }]);
       const [input, setInput] = useState('');
       const [loading, setLoading] = useState(false);
       const [generatedCode, setGeneratedCode] = useState('');
@@ -96,53 +139,46 @@ Output ONLY the code, no explanations. Start directly with the imports.`;
 
       useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [messages, loading]);
 
-      const handleSetKey = () => { if (apiKey.trim().startsWith('sk-')) { setApiKeySet(true); setError(''); } else { setError('Chave invalida.'); } };
-
       const sendMessage = useCallback(async () => {
-        if (!input.trim() || loading) return;
+        if (!input.trim() || loading || !session) return;
         const userMsg = input.trim(); setInput(''); setError('');
         const newMessages = [...messages, { role: 'user', content: userMsg }];
         setMessages(newMessages); setLoading(true);
+        const { provider, apiKey, model } = session;
+        const p = PROVIDERS[provider];
         try {
-          const response = await fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: [{ role: 'system', content: LOVABLE_SYSTEM_PROMPT }, ...newMessages.map(m => ({ role: m.role, content: m.content }))], max_tokens: 4096, temperature: 0.7 }) });
+          const response = await fetch(`${p.baseUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: [{ role: 'system', content: LOVABLE_SYSTEM_PROMPT }, ...newMessages.map(m => ({ role: m.role, content: m.content }))], max_tokens: 4096, temperature: 0.7 }) });
           if (!response.ok) { const err = await response.json(); throw new Error(err.error?.message || `Erro ${response.status}`); }
           const data = await response.json();
           const assistantMsg = data.choices[0].message.content;
           setMessages(prev => [...prev, { role: 'assistant', content: 'Codigo gerado! Veja no painel direito.' }]);
           const codeMatch = assistantMsg.match(/```(?:tsx?|jsx?)?\n?([\s\S]*?)```/);
-          const code = codeMatch ? codeMatch[1].trim() : assistantMsg.trim();
-          setGeneratedCode(code); setActiveTab('code');
+          setGeneratedCode(codeMatch ? codeMatch[1].trim() : assistantMsg.trim());
+          setActiveTab('code');
         } catch (e) { setError(e.message); setMessages(prev => [...prev, { role: 'assistant', content: `Erro: ${e.message}` }]); }
         finally { setLoading(false); }
-      }, [input, loading, messages, apiKey, model]);
+      }, [input, loading, messages, session]);
 
       const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
       const EXAMPLES = ['Dashboard de analytics com graficos', 'App de tarefas Kanban', 'Landing page para SaaS', 'Timer Pomodoro com historico'];
 
-      if (!apiKeySet) return (
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="w-full max-w-md fade-in">
-            <div className="text-center mb-8"><div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl">*</div><h1 className="text-2xl font-bold text-white mb-2">Lovable Generator</h1><p className="text-gray-400 text-sm">Gerador de apps React com o sistema do Lovable</p></div>
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 space-y-4">
-              <div><label className="text-sm text-gray-400 mb-2 block">Chave OpenAI</label><input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSetKey()} placeholder="sk-proj-..." className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm" /><p className="text-xs text-gray-500 mt-2">Fica so no browser, nunca e enviada a terceiros.</p></div>
-              <div><label className="text-sm text-gray-400 mb-2 block">Modelo</label><select value={model} onChange={e => setModel(e.target.value)} className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 text-sm">{MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select></div>
-              {error && <p className="text-red-400 text-xs">{error}</p>}
-              <button onClick={handleSetKey} className="w-full bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 text-white font-semibold py-3 rounded-xl transition-all">Comecar</button>
-            </div>
-          </div>
-        </div>
-      );
+      if (!session) return <ProviderSetup onReady={setSession} />;
+      const p = PROVIDERS[session.provider];
 
       return (
         <div className="flex h-screen overflow-hidden">
           <div className="w-[380px] flex-shrink-0 flex flex-col border-r border-gray-800 bg-gray-950">
             <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
-              <div className="flex items-center gap-2"><div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center text-xs font-bold">L</div><span className="font-semibold text-white text-sm">Lovable Generator</span></div>
-              <div className="flex items-center gap-2"><select value={model} onChange={e => setModel(e.target.value)} className="text-xs bg-gray-800 border border-gray-700 text-gray-400 rounded-lg px-2 py-1 focus:outline-none">{MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select><button onClick={() => { setApiKeySet(false); setApiKey(''); }} className="text-xs text-gray-500 hover:text-gray-300">chave</button></div>
+              <div className="flex items-center gap-2"><div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center text-xs font-bold text-white">L</div><span className="font-semibold text-white text-sm">Lovable Generator</span></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-1 rounded-lg font-medium" style={{ background: p.color + '22', color: p.color }}>{p.label}</span>
+                <select value={session.model} onChange={e => setSession(prev => ({ ...prev, model: e.target.value }))} className="text-xs bg-gray-800 border border-gray-700 text-gray-400 rounded-lg px-2 py-1 focus:outline-none max-w-[110px]">{p.models.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select>
+                <button onClick={() => setSession(null)} className="text-xs text-gray-500 hover:text-gray-300" title="Trocar provedor">chave</button>
+              </div>
             </div>
             <div ref={chatRef} className="flex-1 overflow-y-auto chat-scroll px-4 py-4 space-y-4">
               {messages.map((m, i) => <Message key={i} msg={m} />)}
-              {loading && <div className="flex gap-3 fade-in"><div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-sm font-bold flex-shrink-0">L</div><div className="bg-gray-800 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2"><svg className="spinner w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" strokeLinecap="round"/></svg><span className="text-sm text-gray-400">Gerando...</span></div></div>}
+              {loading && <div className="flex gap-3 fade-in"><div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-sm font-bold flex-shrink-0">L</div><div className="bg-gray-800 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2"><svg className="spinner w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" strokeLinecap="round"/></svg><span className="text-sm text-gray-400">Gerando via {p.label}...</span></div></div>}
             </div>
             <div className="px-4 py-3 border-t border-gray-800">
               {error && <p className="text-red-400 text-xs mb-2">{error}</p>}
@@ -157,18 +193,8 @@ Output ONLY the code, no explanations. Start directly with the imports.`;
             </div>
             <div className="flex-1 overflow-auto p-4">
               {activeTab === 'code' ? (generatedCode ? <CodeBlock code={generatedCode} /> :
-                <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="text-5xl text-gray-700">*</div>
-                  <div><p className="text-lg font-medium text-gray-500">Nenhum codigo gerado</p><p className="text-sm text-gray-600 mt-1">Descreva um app para comecar</p></div>
-                  <div className="grid grid-cols-2 gap-3 mt-2 text-xs max-w-sm">{EXAMPLES.map(ex => <button key={ex} onClick={() => setInput(ex)} className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl p-3 text-gray-400 hover:text-gray-200 transition-colors text-left">{ex}</button>)}</div>
-                </div>
-              ) : (
-                <div className="max-w-2xl space-y-4 text-sm text-gray-400">
-                  <h2 className="text-white font-bold text-lg">Como usar</h2>
-                  <div className="bg-gray-800 rounded-xl p-4 space-y-2"><p>1. Cole sua chave OpenAI</p><p>2. Descreva o app com detalhes</p><p>3. Copie o App.tsx gerado para um projeto Vite+React+Tailwind</p><p>4. Peca ajustes no chat</p></div>
-                  <p className="text-gray-600 text-xs">Stack: React 18 + TypeScript + Tailwind CSS + shadcn/ui + Lucide React</p>
-                </div>
-              )}
+                <div className="h-full flex flex-col items-center justify-center text-center space-y-4"><div className="text-5xl text-gray-700">*</div><div><p className="text-lg font-medium text-gray-500">Nenhum codigo gerado</p><p className="text-sm text-gray-600 mt-1">Descreva um app para comecar</p></div><div className="grid grid-cols-2 gap-3 mt-2 text-xs max-w-sm">{EXAMPLES.map(ex => <button key={ex} onClick={() => setInput(ex)} className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl p-3 text-gray-400 hover:text-gray-200 transition-colors text-left">{ex}</button>)}</div></div>
+              ) : (<div className="max-w-2xl space-y-4 text-sm text-gray-400"><h2 className="text-white font-bold text-lg">Provedores suportados</h2>{PROVIDER_ORDER.map(id => { const pv = PROVIDERS[id]; return (<div key={id} className="bg-gray-800 rounded-xl p-3 flex items-start gap-3"><span className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ background: pv.color + '22', color: pv.color }}>{pv.label}</span><div><p className="text-gray-300 text-xs">{pv.models.map(m => m.label).join(', ')}</p><p className="text-gray-500 text-xs mt-0.5">{pv.keyHint}</p></div></div>); })}<p className="text-gray-600 text-xs pt-2">Stack: React 18 + TypeScript + Tailwind + shadcn/ui + Lucide React</p></div>)}
             </div>
           </div>
         </div>
