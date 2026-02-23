@@ -60,12 +60,36 @@ When generating code:
 Output ONLY the code, no explanations. Start directly with the imports.`;
 
     const PROVIDERS = {
-      openai: { label: 'OpenAI', color: '#10a37f', baseUrl: 'https://api.openai.com/v1', keyPlaceholder: 'sk-proj-...', keyHint: 'platform.openai.com/api-keys', models: [{ id: 'gpt-4o', label: 'GPT-4o' }, { id: 'gpt-4o-mini', label: 'GPT-4o Mini (rapido)' }, { id: 'gpt-4-turbo', label: 'GPT-4 Turbo' }] },
-      groq: { label: 'Groq', color: '#f55036', baseUrl: 'https://api.groq.com/openai/v1', keyPlaceholder: 'gsk_...', keyHint: 'console.groq.com/keys - GRATIS', models: [{ id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B (recomendado)' }, { id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B (ultra rapido)' }, { id: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' }, { id: 'qwen-2.5-coder-32b', label: 'Qwen 2.5 Coder 32B' }] },
-      perplexity: { label: 'Perplexity', color: '#20808d', baseUrl: 'https://api.perplexity.ai', keyPlaceholder: 'pplx-...', keyHint: 'perplexity.ai/settings/api', models: [{ id: 'sonar', label: 'Sonar (rapido)' }, { id: 'sonar-pro', label: 'Sonar Pro' }, { id: 'sonar-reasoning', label: 'Sonar Reasoning' }] },
-      qwen: { label: 'Qwen', color: '#6366f1', baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', keyPlaceholder: 'sk-...', keyHint: 'bailian.console.aliyun.com - GRATIS (trial)', models: [{ id: 'qwen-coder-plus', label: 'Qwen Coder Plus' }, { id: 'qwen-coder-turbo', label: 'Qwen Coder Turbo (rapido)' }, { id: 'qwen-plus', label: 'Qwen Plus' }, { id: 'qwen-turbo', label: 'Qwen Turbo' }] }
+      openai: {
+        label: 'OpenAI',
+        color: '#10a37f',
+        baseUrl: 'https://api.openai.com/v1',
+        keyPlaceholder: 'sk-proj-...',
+        keyHint: 'platform.openai.com/api-keys',
+        badge: null,
+        models: [
+          { id: 'gpt-4o', label: 'GPT-4o' },
+          { id: 'gpt-4o-mini', label: 'GPT-4o Mini (rapido)' },
+          { id: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+        ]
+      },
+      groq: {
+        label: 'Groq',
+        color: '#f55036',
+        baseUrl: 'https://api.groq.com/openai/v1',
+        keyPlaceholder: 'gsk_...',
+        keyHint: 'console.groq.com/keys',
+        badge: 'GRATIS',
+        models: [
+          { id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+          { id: 'qwen-2.5-coder-32b', label: 'Qwen 2.5 Coder 32B' },
+          { id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B (ultra rapido)' },
+          { id: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' },
+        ]
+      },
     };
-    const PROVIDER_ORDER = ['openai', 'groq', 'perplexity', 'qwen'];
+
+    const PROVIDER_ORDER = ['openai', 'groq'];
 
     function CopyButton({ text }) {
       const [copied, setCopied] = useState(false);
@@ -85,9 +109,9 @@ Output ONLY the code, no explanations. Start directly with the imports.`;
     }
 
     function ProviderSetup({ onReady }) {
-      const [provider, setProvider] = useState('openai');
-      const [keys, setKeys] = useState({ openai: '', groq: '', perplexity: '', qwen: '' });
-      const [model, setModel] = useState(PROVIDERS.openai.models[0].id);
+      const [provider, setProvider] = useState('groq');
+      const [keys, setKeys] = useState({ openai: '', groq: '' });
+      const [model, setModel] = useState(PROVIDERS.groq.models[0].id);
       const [error, setError] = useState('');
       const p = PROVIDERS[provider];
       const handleProviderChange = (id) => { setProvider(id); setModel(PROVIDERS[id].models[0].id); setError(''); };
@@ -100,27 +124,60 @@ Output ONLY the code, no explanations. Start directly with the imports.`;
       return (
         <div className="min-h-screen flex items-center justify-center p-6">
           <div className="w-full max-w-md fade-in">
-            <div className="text-center mb-8"><div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-white">*</div><h1 className="text-2xl font-bold text-white mb-1">Lovable Generator</h1><p className="text-gray-400 text-sm">Gerador de apps React com o sistema do Lovable</p></div>
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-white">L</div>
+              <h1 className="text-2xl font-bold text-white mb-1">Lovable Generator</h1>
+              <p className="text-gray-400 text-sm">Gerador de apps React com o sistema do Lovable</p>
+            </div>
             <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 space-y-5">
               <div>
                 <label className="text-sm text-gray-400 mb-2 block">Provedor</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {PROVIDER_ORDER.map(id => (<button key={id} onClick={() => handleProviderChange(id)} style={provider === id ? { background: PROVIDERS[id].color } : {}} className={`py-2 px-1 rounded-xl text-xs font-semibold border transition-all ${provider === id ? 'border-transparent text-white' : 'border-gray-700 text-gray-400 hover:border-gray-500 bg-gray-800'}`}>{PROVIDERS[id].label}</button>))}
+                <div className="grid grid-cols-2 gap-3">
+                  {PROVIDER_ORDER.map(id => {
+                    const pv = PROVIDERS[id];
+                    const isActive = provider === id;
+                    return (
+                      <button key={id} onClick={() => handleProviderChange(id)}
+                        style={isActive ? { background: pv.color, borderColor: pv.color } : {}}
+                        className={`relative py-3 px-4 rounded-xl text-sm font-semibold border transition-all text-left ${isActive ? 'text-white' : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200 bg-gray-800'}`}>
+                        {pv.label}
+                        {pv.badge && (
+                          <span className={`absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-green-500/20 text-green-400'}`}>
+                            {pv.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                {provider === 'groq' && <p className="text-xs text-green-400 mt-2">Groq e GRATIS - crie em console.groq.com</p>}
-                {provider === 'qwen' && <p className="text-xs text-green-400 mt-2">Qwen tem tier gratuito - crie em bailian.console.aliyun.com</p>}
+                {provider === 'groq' && (
+                  <div className="mt-3 bg-green-500/10 border border-green-500/20 rounded-xl p-3">
+                    <p className="text-xs text-green-400 font-medium">Groq e 100% gratuito</p>
+                    <p className="text-xs text-green-400/70 mt-0.5">Crie sua chave em console.groq.com/keys - sem cartao de credito</p>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-sm text-gray-400 mb-2 block">Chave API - {p.label}</label>
-                <input type="password" value={keys[provider]} onChange={e => setKeys(prev => ({ ...prev, [provider]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleStart()} placeholder={p.keyPlaceholder} className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm" />
-                <p className="text-xs text-gray-500 mt-1.5">{p.keyHint}</p>
+                <input type="password" value={keys[provider]}
+                  onChange={e => setKeys(prev => ({ ...prev, [provider]: e.target.value }))}
+                  onKeyDown={e => e.key === 'Enter' && handleStart()}
+                  placeholder={p.keyPlaceholder} autoFocus
+                  className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors text-sm" />
+                <p className="text-xs text-gray-500 mt-1.5">{p.keyHint} - fica so no seu navegador</p>
               </div>
               <div>
                 <label className="text-sm text-gray-400 mb-2 block">Modelo</label>
-                <select value={model} onChange={e => setModel(e.target.value)} className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 text-sm">{p.models.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select>
+                <select value={model} onChange={e => setModel(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors text-sm">
+                  {p.models.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+                </select>
               </div>
               {error && <p className="text-red-400 text-xs">{error}</p>}
-              <button onClick={handleStart} className="w-full bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 text-white font-semibold py-3 rounded-xl transition-all">Comecar</button>
+              <button onClick={handleStart}
+                className="w-full bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 text-white font-semibold py-3 rounded-xl transition-all transform hover:scale-[1.01]">
+                Comecar
+              </button>
             </div>
           </div>
         </div>
@@ -129,7 +186,7 @@ Output ONLY the code, no explanations. Start directly with the imports.`;
 
     function App() {
       const [session, setSession] = useState(null);
-      const [messages, setMessages] = useState([{ role: 'assistant', content: 'Ola! Descreva o app React que voce quer criar.' }]);
+      const [messages, setMessages] = useState([{ role: 'assistant', content: 'Ola! Descreva o app React que voce quer criar e eu vou gerar o codigo completo.' }]);
       const [input, setInput] = useState('');
       const [loading, setLoading] = useState(false);
       const [generatedCode, setGeneratedCode] = useState('');
@@ -147,11 +204,15 @@ Output ONLY the code, no explanations. Start directly with the imports.`;
         const { provider, apiKey, model } = session;
         const p = PROVIDERS[provider];
         try {
-          const response = await fetch(`${p.baseUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: [{ role: 'system', content: LOVABLE_SYSTEM_PROMPT }, ...newMessages.map(m => ({ role: m.role, content: m.content }))], max_tokens: 4096, temperature: 0.7 }) });
+          const response = await fetch(`${p.baseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({ model, messages: [{ role: 'system', content: LOVABLE_SYSTEM_PROMPT }, ...newMessages.map(m => ({ role: m.role, content: m.content }))], max_tokens: 4096, temperature: 0.7 })
+          });
           if (!response.ok) { const err = await response.json(); throw new Error(err.error?.message || `Erro ${response.status}`); }
           const data = await response.json();
           const assistantMsg = data.choices[0].message.content;
-          setMessages(prev => [...prev, { role: 'assistant', content: 'Codigo gerado! Veja no painel direito.' }]);
+          setMessages(prev => [...prev, { role: 'assistant', content: 'Codigo gerado! Veja no painel a direita.' }]);
           const codeMatch = assistantMsg.match(/```(?:tsx?|jsx?)?\n?([\s\S]*?)```/);
           setGeneratedCode(codeMatch ? codeMatch[1].trim() : assistantMsg.trim());
           setActiveTab('code');
@@ -169,37 +230,100 @@ Output ONLY the code, no explanations. Start directly with the imports.`;
         <div className="flex h-screen overflow-hidden">
           <div className="w-[380px] flex-shrink-0 flex flex-col border-r border-gray-800 bg-gray-950">
             <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
-              <div className="flex items-center gap-2"><div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center text-xs font-bold text-white">L</div><span className="font-semibold text-white text-sm">Lovable Generator</span></div>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center text-xs font-bold text-white">L</div>
+                <span className="font-semibold text-white text-sm">Lovable Generator</span>
+              </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2 py-1 rounded-lg font-medium" style={{ background: p.color + '22', color: p.color }}>{p.label}</span>
-                <select value={session.model} onChange={e => setSession(prev => ({ ...prev, model: e.target.value }))} className="text-xs bg-gray-800 border border-gray-700 text-gray-400 rounded-lg px-2 py-1 focus:outline-none max-w-[110px]">{p.models.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select>
+                <select value={session.model} onChange={e => setSession(prev => ({ ...prev, model: e.target.value }))}
+                  className="text-xs bg-gray-800 border border-gray-700 text-gray-400 rounded-lg px-2 py-1 focus:outline-none max-w-[130px]">
+                  {p.models.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+                </select>
                 <button onClick={() => setSession(null)} className="text-xs text-gray-500 hover:text-gray-300" title="Trocar provedor">chave</button>
               </div>
             </div>
             <div ref={chatRef} className="flex-1 overflow-y-auto chat-scroll px-4 py-4 space-y-4">
               {messages.map((m, i) => <Message key={i} msg={m} />)}
-              {loading && <div className="flex gap-3 fade-in"><div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-sm font-bold flex-shrink-0">L</div><div className="bg-gray-800 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2"><svg className="spinner w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" strokeLinecap="round"/></svg><span className="text-sm text-gray-400">Gerando via {p.label}...</span></div></div>}
+              {loading && (
+                <div className="flex gap-3 fade-in">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-sm font-bold flex-shrink-0">L</div>
+                  <div className="bg-gray-800 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2">
+                    <svg className="spinner w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" strokeLinecap="round"/></svg>
+                    <span className="text-sm text-gray-400">Gerando via {p.label}...</span>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="px-4 py-3 border-t border-gray-800">
               {error && <p className="text-red-400 text-xs mb-2">{error}</p>}
-              <div className="flex gap-2 items-end"><textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Descreva o app..." rows={2} className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 resize-none" /><button onClick={sendMessage} disabled={loading || !input.trim()} className="w-10 h-10 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 text-white rounded-xl transition-colors flex items-center justify-center flex-shrink-0">{loading ? <svg className="spinner w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" strokeLinecap="round"/></svg> : '->'}</button></div>
+              <div className="flex gap-2 items-end">
+                <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}
+                  placeholder="Descreva o app que voce quer criar..." rows={2}
+                  className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 resize-none" />
+                <button onClick={sendMessage} disabled={loading || !input.trim()}
+                  className="w-10 h-10 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 text-white rounded-xl transition-colors flex items-center justify-center flex-shrink-0">
+                  {loading ? <svg className="spinner w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" strokeLinecap="round"/></svg> : '->'}
+                </button>
+              </div>
               <p className="text-xs text-gray-600 mt-1.5">Enter envia - Shift+Enter nova linha</p>
             </div>
           </div>
           <div className="flex-1 flex flex-col bg-gray-900">
             <div className="flex border-b border-gray-800 px-4">
-              {['code', 'help'].map(tab => (<button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-3 text-sm font-medium transition-colors ${activeTab === tab ? 'tab-active' : 'text-gray-500 hover:text-gray-300'}`}>{tab === 'code' ? 'Codigo' : 'Ajuda'}</button>))}
+              {['code', 'help'].map(tab => (
+                <button key={tab} onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-3 text-sm font-medium transition-colors ${activeTab === tab ? 'tab-active' : 'text-gray-500 hover:text-gray-300'}`}>
+                  {tab === 'code' ? 'Codigo' : 'Ajuda'}
+                </button>
+              ))}
               {generatedCode && <div className="ml-auto flex items-center py-2"><CopyButton text={generatedCode} /></div>}
             </div>
             <div className="flex-1 overflow-auto p-4">
-              {activeTab === 'code' ? (generatedCode ? <CodeBlock code={generatedCode} /> :
-                <div className="h-full flex flex-col items-center justify-center text-center space-y-4"><div className="text-5xl text-gray-700">*</div><div><p className="text-lg font-medium text-gray-500">Nenhum codigo gerado</p><p className="text-sm text-gray-600 mt-1">Descreva um app para comecar</p></div><div className="grid grid-cols-2 gap-3 mt-2 text-xs max-w-sm">{EXAMPLES.map(ex => <button key={ex} onClick={() => setInput(ex)} className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl p-3 text-gray-400 hover:text-gray-200 transition-colors text-left">{ex}</button>)}</div></div>
-              ) : (<div className="max-w-2xl space-y-4 text-sm text-gray-400"><h2 className="text-white font-bold text-lg">Provedores suportados</h2>{PROVIDER_ORDER.map(id => { const pv = PROVIDERS[id]; return (<div key={id} className="bg-gray-800 rounded-xl p-3 flex items-start gap-3"><span className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ background: pv.color + '22', color: pv.color }}>{pv.label}</span><div><p className="text-gray-300 text-xs">{pv.models.map(m => m.label).join(', ')}</p><p className="text-gray-500 text-xs mt-0.5">{pv.keyHint}</p></div></div>); })}<p className="text-gray-600 text-xs pt-2">Stack: React 18 + TypeScript + Tailwind + shadcn/ui + Lucide React</p></div>)}
+              {activeTab === 'code' ? (
+                generatedCode ? <CodeBlock code={generatedCode} /> : (
+                  <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="text-5xl text-gray-700">L</div>
+                    <div><p className="text-lg font-medium text-gray-500">Nenhum codigo gerado</p><p className="text-sm text-gray-600 mt-1">Descreva um app para comecar</p></div>
+                    <div className="grid grid-cols-2 gap-3 mt-2 text-xs max-w-sm">
+                      {EXAMPLES.map(ex => <button key={ex} onClick={() => setInput(ex)} className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl p-3 text-gray-400 hover:text-gray-200 transition-colors text-left">{ex}</button>)}
+                    </div>
+                  </div>
+                )
+              ) : (
+                <div className="max-w-2xl space-y-5 text-sm text-gray-400">
+                  <h2 className="text-white font-bold text-lg">Como usar</h2>
+                  <div className="bg-gray-800 rounded-xl p-4 space-y-2">
+                    <p><strong className="text-violet-400">1.</strong> Escolha o provedor e insira a chave API</p>
+                    <p><strong className="text-violet-400">2.</strong> Descreva o app (funcionalidades, visual, dados)</p>
+                    <p><strong className="text-violet-400">3.</strong> Copie o App.tsx para um projeto Vite+React+Tailwind</p>
+                    <p><strong className="text-violet-400">4.</strong> Peca ajustes no chat - o contexto e mantido</p>
+                  </div>
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+                    <p className="text-green-400 font-medium text-sm">Usar de graca com Groq</p>
+                    <p className="text-green-400/70 text-xs mt-1">Crie conta em console.groq.com, gere uma chave e use o Qwen 2.5 Coder 32B - excelente para codigo.</p>
+                  </div>
+                  <h3 className="text-white font-semibold">Modelos disponiveis</h3>
+                  <div className="space-y-3">
+                    {PROVIDER_ORDER.map(id => { const pv = PROVIDERS[id]; return (
+                      <div key={id} className="bg-gray-800 rounded-xl p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ background: pv.color + '22', color: pv.color }}>{pv.label}</span>
+                          {pv.badge && <span className="text-xs text-green-400 font-medium">{pv.badge}</span>}
+                        </div>
+                        <ul className="space-y-1">{pv.models.map(m => <li key={m.id} className="text-xs text-gray-400">- {m.label}</li>)}</ul>
+                      </div>
+                    ); })}
+                  </div>
+                  <p className="text-gray-600 text-xs">Stack: React 18 + TypeScript + Tailwind CSS + shadcn/ui + Lucide React</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       );
     }
+
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
